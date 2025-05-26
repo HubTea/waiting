@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 import 'dotenv/config';
 import {Sequelize, Model, DataTypes} from 'sequelize';
 import express from 'express';
@@ -77,8 +79,18 @@ app.listen(LISTEN_PORT, function (error) {
     console.log('listening ' + LISTEN_PORT)
 });
 
-app.post('/waiting', async function register(request, response) {
+app.put('/waiting', async function register(request, response) {
+    let sessionId: string = crypto.randomUUID();
 
+    let waiting: WaitingEntity = castWaiting(await createWaiting({
+        sessionId,
+        enterable: false,
+        expire: null,
+    }));
+
+    response.json({
+        sessionId: waiting.sessionId,
+    });
 });
 
 app.get('/waiting', async function getWaiting(request, response) {
