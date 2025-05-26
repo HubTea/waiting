@@ -4,10 +4,15 @@ import express from 'express';
 
 //전역 변수 설정
 const DATABASE_URL: string = process.env.DATABASE_URL!;
+const DATABASE_POOL_MAX: number = parseInt(process.env.DATABASE_POOL_MAX!);
 const LISTEN_PORT: number = parseInt(process.env.LISTEN_PORT!);
 
 //Sequelize 설정
-let sequelize = new Sequelize(DATABASE_URL);
+let sequelize = new Sequelize(DATABASE_URL, {
+    pool: {
+        max: DATABASE_POOL_MAX,
+    },
+});
 sequelize.authenticate().then(() => console.log('sequelize authenticated'));
 
 //Sequelize 모델 정의
