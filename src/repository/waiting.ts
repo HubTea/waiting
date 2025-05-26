@@ -3,22 +3,22 @@ import {Model, DataTypes} from 'sequelize';
 import {sequelize} from '../connection';
 
 export interface WaitingEntity {
-    id: number;
+    number: number;
     sessionId: string;
-    enterable: boolean;
+    authorized: boolean;
     expire: Date | null;
 }
 
 export interface WaitingSeed {
     sessionId: WaitingEntity['sessionId'];
-    enterable: WaitingEntity['enterable'];
+    enterable: WaitingEntity['authorized'];
     expire: WaitingEntity['expire'];
 }
 
 export class Waiting extends Model<WaitingEntity, WaitingSeed> {
-    static id = 'id';
+    static number = 'number';
     static sessionId = 'sessionId';
-    static enterable = 'enterable';
+    static authorized = 'authorized';
     static expire = 'expire';
 }
 
@@ -31,7 +31,7 @@ export function castWaiting(waiting: Waiting): WaitingEntity {
 }
 
 Waiting.init({
-    id: {
+    number: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
@@ -42,7 +42,7 @@ Waiting.init({
         unique: true,
     },
 
-    enterable: {
+    authorized: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
     },
