@@ -53,5 +53,10 @@ Waiting.init({
 });
 
 let app = express();
-app.listen(parseInt(process.env.LISTEN_PORT as string), () => console.log('listening ' + process.env.LISTEN_PORT));
+app.listen(parseInt(process.env.LISTEN_PORT as string), function (error) {
+    if(error) {
+        throw error;
+    }
+    console.log('listening ' + process.env.LISTEN_PORT)
+});
 
