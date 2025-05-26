@@ -11,7 +11,7 @@ export interface WaitingEntity {
 
 export interface WaitingSeed {
     sessionId: WaitingEntity['sessionId'];
-    enterable: WaitingEntity['authorized'];
+    authorized: WaitingEntity['authorized'];
     expire: WaitingEntity['expire'];
 }
 

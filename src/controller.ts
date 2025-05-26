@@ -17,7 +17,7 @@ app.put('/waiting', async function register(request, response) {
 
     let waiting: WaitingEntity = castWaiting(await createWaiting({
         sessionId,
-        enterable: false,
+        authorized: false,
         expire: null,
     }));
 
