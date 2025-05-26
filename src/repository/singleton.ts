@@ -7,16 +7,12 @@ export interface SingletonEntity {
     capacity: number;
 }
 
-export interface SingletonSeed {
-    capacity: SingletonEntity['capacity'];
-}
-
-export class Singleton extends Model<SingletonEntity, SingletonSeed> {
+export class Singleton extends Model<SingletonEntity> {
     static id = 'id';
     static capacity = 'capacity';
 }
 
-export async function createSingleton(seed: SingletonSeed): Promise<Singleton> {
+export async function createSingleton(seed: SingletonEntity): Promise<Singleton> {
     return await Singleton.create(seed);
 }
 
@@ -31,7 +27,7 @@ Singleton.init({
     },
 
     capacity: DataTypes.INTEGER,
-    
+
 }, {
     sequelize,
     freezeTableName: true,
