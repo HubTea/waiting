@@ -60,3 +60,18 @@ app.listen(parseInt(process.env.LISTEN_PORT as string), function (error) {
     console.log('listening ' + process.env.LISTEN_PORT)
 });
 
+app.post('/waiting', async function register(request, response) {
+
+});
+
+app.get('/waiting', async function getWaiting(request, response) {
+
+});
+
+app.get('/ticket', async function getTicket(request, response) {
+
+});
+
+app.all('/{*anyPath}', async function relay(request, response) {
+    
+});
