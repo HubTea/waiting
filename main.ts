@@ -23,12 +23,13 @@ interface WaitingEntity {
     expire: Date | null;
 }
 
-class Waiting extends Model<WaitingEntity> implements WaitingEntity {
-    id!: number;
-    sessionId!: string;
-    enterable!: boolean;
-    expire!: Date | null;
+interface WaitingSeed {
+    sessionId: WaitingEntity['sessionId'];
+    enterable: WaitingEntity['enterable'];
+    expire: WaitingEntity['expire'];
+}
 
+class Waiting extends Model<WaitingEntity, WaitingSeed> {
     static id = 'id';
     static sessionId = 'sessionId';
     static enterable = 'enterable';
@@ -59,8 +60,12 @@ Waiting.init({
     freezeTableName: true,
 });
 
-async function createWaiting(entity: WaitingEntity): Promise<Waiting> {
-    return await Waiting.create(entity);
+async function createWaiting(seed: WaitingSeed): Promise<Waiting> {
+    return await Waiting.create(seed);
+}
+
+function castWaiting(waiting: Waiting): WaitingEntity {
+    return waiting as any as WaitingEntity;
 }
 
 //express 설정
