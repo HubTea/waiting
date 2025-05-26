@@ -2,12 +2,15 @@ import 'dotenv/config';
 import {Sequelize, Model, DataTypes} from 'sequelize';
 import express from 'express';
 
+//전역 변수 설정
 const DATABASE_URL: string = process.env.DATABASE_URL!;
 const LISTEN_PORT: number = parseInt(process.env.LISTEN_PORT!);
 
+//Sequelize 설정
 let sequelize = new Sequelize(DATABASE_URL);
 sequelize.authenticate().then(() => console.log('sequelize authenticated'));
 
+//Sequelize 모델 정의
 interface WaitingEntity {
     id: number;
     sessionId: string;
@@ -25,10 +28,6 @@ class Waiting extends Model<WaitingEntity> implements WaitingEntity {
     static sessionId = 'sessionId';
     static enterable = 'enterable';
     static expire = 'expire';
-}
-
-async function createWaiting(entity: WaitingEntity): Promise<Waiting> {
-    return await Waiting.create(entity);
 }
 
 Waiting.init({
@@ -55,6 +54,11 @@ Waiting.init({
     freezeTableName: true,
 });
 
+async function createWaiting(entity: WaitingEntity): Promise<Waiting> {
+    return await Waiting.create(entity);
+}
+
+//express 설정
 let app = express();
 app.listen(LISTEN_PORT, function (error) {
     if(error) {
