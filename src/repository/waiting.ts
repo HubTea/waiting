@@ -42,11 +42,7 @@ Waiting.init({
         unique: true,
     },
 
-    authorized: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-    },
-
+    authorized: DataTypes.BOOLEAN,
     expire: DataTypes.DATE,
 
 }, {
