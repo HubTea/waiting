@@ -1,4 +1,4 @@
-import {Model, DataTypes} from 'sequelize';
+import {Model, DataTypes, CreateOptions} from 'sequelize';
 
 import {sequelize} from '../connection';
 
@@ -9,21 +9,15 @@ export interface WaitingEntity {
     expire: Date | null;
 }
 
-export interface WaitingSeed {
-    sessionId: WaitingEntity['sessionId'];
-    authorized: WaitingEntity['authorized'];
-    expire: WaitingEntity['expire'];
-}
-
-export class Waiting extends Model<WaitingEntity, WaitingSeed> {
+export class Waiting extends Model<WaitingEntity> {
     static number = 'number';
     static sessionId = 'sessionId';
     static authorized = 'authorized';
     static expire = 'expire';
 }
 
-export async function createWaiting(seed: WaitingSeed): Promise<Waiting> {
-    return await Waiting.create(seed);
+export async function createWaiting(seed: WaitingEntity, option?: CreateOptions<WaitingEntity>): Promise<Waiting> {
+    return await Waiting.create(seed, option);
 }
 
 export function castWaiting(waiting: Waiting): WaitingEntity {
@@ -33,7 +27,6 @@ export function castWaiting(waiting: Waiting): WaitingEntity {
 Waiting.init({
     number: {
         type: DataTypes.INTEGER,
-        autoIncrement: true,
         primaryKey: true,
     },
 
