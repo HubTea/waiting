@@ -155,7 +155,7 @@ app.all('/{*anyPath}', async function relay(request, response) {
         body = Buffer.concat(chunkList);
     }
 
-    let upstreamResponse = await fetch(UPSTREAM_URL, {
+    let upstreamResponse = await fetch(UPSTREAM_URL + request.path, {
         method: request.method,
         headers: request.headers as any,
         body,
@@ -169,9 +169,12 @@ app.all('/{*anyPath}', async function relay(request, response) {
         }
         responseBody = Buffer.concat(upstreamChunkList);
     }
+
+    let responseHeader: Headers = new Headers(upstreamResponse.headers);
+    responseHeader.delete('Content-Encoding');
     
     response.status(upstreamResponse.status);
-    response.setHeaders(upstreamResponse.headers);
+    response.setHeaders(responseHeader);
     response.end(responseBody);
 });
 
