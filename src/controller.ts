@@ -7,7 +7,7 @@ import cookieParser from 'cookie-parser';
 import { sequelize } from './connection';
 import { Waiting, WaitingEntity, createWaiting, castWaiting } from './repository/waiting';
 import { Singleton, SingletonEntity, castSingleton } from './repository/singleton';
-import { LISTEN_PORT, AUTHORIZATION_REFRESH_TIME, UPSTREAM_URL } from './config';
+import { LISTEN_PORT, AUTHORIZATION_REFRESH_TIME, UPSTREAM_URL, STUB_LISTEN_PORT } from './config';
 
 export let app = express();
 app.listen(LISTEN_PORT, function (error) {
@@ -173,4 +173,19 @@ app.all('/{*anyPath}', async function relay(request, response) {
     response.status(upstreamResponse.status);
     response.setHeaders(upstreamResponse.headers);
     response.end(responseBody);
+});
+
+let stub = express();
+stub.listen(STUB_LISTEN_PORT, error =>{
+    if(error) {
+        throw error;
+    }
+    console.log('stub listening ' + STUB_LISTEN_PORT);
+});
+
+stub.get('/{*anyPath}', (request, response) => {
+    response.end(JSON.stringify({
+        path: request.path,
+        header: request.headers,
+    }, undefined, 4));
 });
