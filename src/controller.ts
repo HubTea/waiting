@@ -7,7 +7,7 @@ import cookieParser from 'cookie-parser';
 import { sequelize } from './connection';
 import { Waiting, WaitingEntity, createWaiting, castWaiting } from './repository/waiting';
 import { Singleton, SingletonEntity, castSingleton } from './repository/singleton';
-import { LISTEN_PORT, AUTHORIZATION_REFRESH_TIME } from './config';
+import { LISTEN_PORT, AUTHORIZATION_REFRESH_TIME, UPSTREAM_URL } from './config';
 
 export let app = express();
 app.listen(LISTEN_PORT, function (error) {
@@ -110,10 +110,10 @@ app.get('/waiting', async function getWaiting(request, response) {
     });
 });
 
-app.get('/ticket', async function getTicket(request, response) {
+app.all('/{*anyPath}', async function relay(request, response) {
     let sessionId: string;
     try {
-        sessionId = zod.string().parse(request.headers['x-session-id']);
+        sessionId = zod.string().parse(request.cookies['session']);
     }
     catch(error) {
         response.status(400);
@@ -137,18 +137,40 @@ app.get('/ticket', async function getTicket(request, response) {
         return;
     }
 
-    let singletonRecord: Singleton | null = await Singleton.findOne({
-        where: {
-            id: 0,
+    let waiting: WaitingEntity = castWaiting(waitingRecord);
+    if(!waiting.authorized) {
+        response.status(400);
+        response.json({
+            error: 'UNAUTHORIZED_REQUEST',
+        });
+        return;
+    }
+
+    let body: Buffer | undefined;
+    let chunkList: Buffer[] = [];
+    if(request.method != 'GET' && request.method != 'HEAD') {
+        for await(let chunk of request) {
+            chunkList.push(chunk);
         }
+        body = Buffer.concat(chunkList);
+    }
+
+    let upstreamResponse = await fetch(UPSTREAM_URL, {
+        method: request.method,
+        headers: request.headers as any,
+        body,
     });
 
-    let waiting: WaitingEntity = castWaiting(waitingRecord);
-    let singleton: SingletonEntity = castSingleton(singletonRecord!);
-
+    let responseBody: Buffer | undefined;
+    let upstreamChunkList: Buffer[] = [];
+    if(upstreamResponse.body) {
+        for await(let chunk of upstreamResponse.body) {
+            upstreamChunkList.push(Buffer.from(chunk));
+        }
+        responseBody = Buffer.concat(upstreamChunkList);
+    }
     
-});
-
-app.all('/{*anyPath}', async function relay(request, response) {
-    
+    response.status(upstreamResponse.status);
+    response.setHeaders(upstreamResponse.headers);
+    response.end(responseBody);
 });
