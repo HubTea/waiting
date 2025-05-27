@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "cookie-parser": "^1.4.7",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "pg": "^8.16.0",
@@ -7,6 +8,7 @@
     "zod": "^3.25.30"
   },
   "devDependencies": {
+    "@types/cookie-parser": "^1.4.8",
     "@types/express": "^5.0.2",
     "@types/node": "^22.15.21",
     "@types/sequelize": "^4.28.20",

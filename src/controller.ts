@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import express from 'express';
 import zod from 'zod';
 import { Transaction } from 'sequelize';
+import cookieParser from 'cookie-parser';
 
 import { sequelize } from './connection';
 import { Waiting, WaitingEntity, createWaiting, castWaiting } from './repository/waiting';
@@ -15,6 +16,7 @@ app.listen(LISTEN_PORT, function (error) {
     }
     console.log('listening ' + LISTEN_PORT)
 });
+app.use(cookieParser());
 
 app.put('/waiting', async function register(request, response) {
     let sessionId: string = crypto.randomUUID();
@@ -61,15 +63,14 @@ app.put('/waiting', async function register(request, response) {
         }));
     });
 
-    response.json({
-        sessionId: waiting!.sessionId,
-    });
+    response.cookie('session', waiting!.sessionId);
+    response.end();
 });
 
 app.get('/waiting', async function getWaiting(request, response) {
     let sessionId: string;
     try {
-        sessionId = zod.string().parse(request.headers['x-session-id']);
+        sessionId = zod.string().parse(request.cookies['session']);
     }
     catch(error) {
         response.status(400);
