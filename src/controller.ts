@@ -20,7 +20,7 @@ app.use(cookieParser());
 
 app.put('/waiting', async function register(request, response) {
     let sessionId: string = crypto.randomUUID();
-    let waiting: WaitingEntity | undefined;
+    let waiting!: WaitingEntity;
     
     await sequelize.transaction({
         isolationLevel: Transaction.ISOLATION_LEVELS.REPEATABLE_READ,
@@ -63,7 +63,7 @@ app.put('/waiting', async function register(request, response) {
         }));
     });
 
-    response.cookie('session', waiting!.sessionId);
+    response.cookie('session', waiting.sessionId);
     response.end();
 });
 
