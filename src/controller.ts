@@ -36,6 +36,7 @@ app.put('/waiting', async function register(request, response) {
 
             await Singleton.update({
                 capacity: singleton.capacity - 1,
+                lastNumber: singleton.currentNumber,
             }, {
                 where: {
                     id: 0
@@ -44,23 +45,23 @@ app.put('/waiting', async function register(request, response) {
             });
         }
 
-        await Singleton.update({
-            lastNumber: singleton.lastNumber + 1,
-        }, {
-            where: {
-                id: 0,
-            },
-            transaction,
-        });
-
         waiting = castWaiting(await createWaiting({
-            number: singleton.lastNumber + 1,
+            number: singleton.currentNumber,
             sessionId,
             authorized,
             expire,
         }, {
             transaction
         }));
+
+        await Singleton.update({
+            currentNumber: singleton.currentNumber + 1,
+        }, {
+            where: {
+                id: 0,
+            },
+            transaction,
+        });
     });
 
     response.cookie('session', waiting.sessionId);

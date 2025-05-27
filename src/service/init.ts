@@ -9,5 +9,6 @@ export async function init() {
         id: 0,
         capacity: CAPACITY,
         lastNumber: 0,
+        currentNumber: 0,
     });
 }
