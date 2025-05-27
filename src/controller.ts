@@ -147,6 +147,14 @@ app.all('/{*anyPath}', async function relay(request, response) {
         return;
     }
 
+    await Waiting.update({
+        expire: new Date(Date.now() + AUTHORIZATION_REFRESH_TIME),
+    }, {
+        where: {
+            number: waiting.number,
+        },
+    });
+
     let body: Buffer | undefined;
     let chunkList: Buffer[] = [];
     if(request.method != 'GET' && request.method != 'HEAD') {
