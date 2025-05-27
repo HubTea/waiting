@@ -5,11 +5,13 @@ import {sequelize} from '../connection';
 export interface SingletonEntity {
     id: number;
     capacity: number;
+    lastNumber: number;
 }
 
 export class Singleton extends Model<SingletonEntity> {
     static id = 'id';
     static capacity = 'capacity';
+    static lastNumber = 'lastNumber';
 }
 
 export async function createSingleton(seed: SingletonEntity): Promise<Singleton> {
@@ -27,6 +29,7 @@ Singleton.init({
     },
 
     capacity: DataTypes.INTEGER,
+    lastNumber: DataTypes.INTEGER,
 
 }, {
     sequelize,
