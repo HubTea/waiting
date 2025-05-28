@@ -1,0 +1,33 @@
+<html>
+    <script>
+        async function newSession() {
+            let response = await fetch('/waiting', {method: 'put'});
+            if(response.status !== 200) {
+                alert('error');
+                return;
+            }
+            await getWaiting();
+        }
+
+        async function getWaiting() {
+            let response = await fetch('/waiting');
+            document.getElementById('waiting').innerText = await response.text();
+        }
+
+        async function getUpstream() {
+            let response = await fetch('/sdf');
+            document.getElementById('upstream').innerText = await response.text();
+        }
+
+        setInterval(getWaiting, 5000);
+    </script>
+    <body>
+        <div>
+            <button onclick="newSession()" style="background-color: skyblue;">PUT /waiting</button>
+            <button onclick="getUpstream()" style="background-color: pink;">get upstream</button>
+        </div>
+        <div id="waiting"></div>
+        <div id="upstream"></div>
+    </body>
+    
+</html>

@@ -17,6 +17,7 @@ app.listen(LISTEN_PORT, function (error) {
     console.log('listening ' + LISTEN_PORT)
 });
 app.use(cookieParser());
+app.use(express.static('./static'));
 
 app.put('/waiting', async function register(request, response) {
     let sessionId: string = crypto.randomUUID();
