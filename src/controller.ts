@@ -22,9 +22,7 @@ app.put('/waiting', async function register(request, response) {
     let sessionId: string = crypto.randomUUID();
     let waiting!: WaitingEntity;
     
-    await sequelize.transaction({
-        isolationLevel: Transaction.ISOLATION_LEVELS.REPEATABLE_READ,
-    }, async function registerAndAuthorize(transaction) {
+    await sequelize.transaction(async function registerAndAuthorize(transaction) {
         let singletonRecord: Singleton | null = await Singleton.findByPk(0, {transaction});
         let singleton: SingletonEntity = castSingleton(singletonRecord!);
 
