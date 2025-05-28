@@ -23,8 +23,8 @@ app.put('/waiting', async function register(request, response) {
     let waiting!: WaitingEntity;
     
     await retryImmediate(() => sequelize.transaction(async function registerAndAuthorize() {
-        let singletonRecord: Singleton | null = await Singleton.findByPk(0);
-        let singleton: SingletonEntity = castSingleton(singletonRecord!);
+        let singletonRecord: Singleton = await Singleton.findByPk(0) as Singleton;
+        let singleton: SingletonEntity = castSingleton(singletonRecord);
 
         let authorized: boolean = false;
         let expire: Date | null = null;
@@ -32,14 +32,9 @@ app.put('/waiting', async function register(request, response) {
             authorized = true;
             expire = new Date(Date.now() + AUTHORIZATION_REFRESH_TIME);
 
-            await Singleton.update({
-                capacity: singleton.capacity - 1,
-                lastNumber: singleton.currentNumber,
-            }, {
-                where: {
-                    id: 0
-                },
-            });
+            singleton.capacity--;
+            singleton.lastNumber = singleton.currentNumber;
+            await singletonRecord.save();
         }
 
         waiting = castWaiting(await createWaiting({
@@ -49,13 +44,8 @@ app.put('/waiting', async function register(request, response) {
             expire,
         }));
 
-        await Singleton.update({
-            currentNumber: singleton.currentNumber + 1,
-        }, {
-            where: {
-                id: 0,
-            },
-        });
+        singleton.currentNumber++;
+        await singletonRecord.save();
     }));
 
     response.cookie('session', waiting.sessionId);
@@ -89,14 +79,9 @@ app.get('/waiting', async function getWaiting(request, response) {
         return;
     }
 
-    let singletonRecord: Singleton | null = await Singleton.findOne({
-        where: {
-            id: 0,
-        }
-    });
-
     let waiting: WaitingEntity = castWaiting(waitingRecord);
-    let singleton: SingletonEntity = castSingleton(singletonRecord!);
+    let singletonRecord: Singleton = await Singleton.findByPk(0) as Singleton;
+    let singleton: SingletonEntity = castSingleton(singletonRecord);
 
     response.json({
         number: waiting.number,

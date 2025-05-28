@@ -18,51 +18,32 @@ async function run() {
             authorized: true,
         }
     });
-    let waitingList: WaitingEntity[] = waitingRecordList.map(x => castWaiting(x));
     
-    for(let waiting of waitingList) {
+    for(let waitingRecord of waitingRecordList) {
         await retryImmediate(() => sequelize.transaction(async function invalidateWaiting() {
-            let singletonRecord: Singleton | null = await Singleton.findByPk(0);
-            let singleton: SingletonEntity = castSingleton(singletonRecord!);
+            let waiting: WaitingEntity = castWaiting(waitingRecord);
+            let singletonRecord: Singleton = await Singleton.findByPk(0) as Singleton;
+            let singleton: SingletonEntity = castSingleton(singletonRecord);
             
-            await Waiting.update({
-                authorized: false,
-            }, {
-                where: {
-                    number: waiting.number,
-                },
-            });
+            waiting.authorized = false;
+            await waitingRecord.save();
 
             let nextWaitingNumber = singleton.lastNumber + 1;
             let nextWaitingRecord: Waiting | null = await Waiting.findByPk(nextWaitingNumber);
+
             if(nextWaitingRecord) {
                 let nextWaiting: WaitingEntity = castWaiting(nextWaitingRecord);
 
-                await Waiting.update({
-                    authorized: true,
-                    expire: new Date(Date.now() + AUTHORIZATION_REFRESH_TIME),
-                }, {
-                    where: {
-                        number: nextWaiting.number,
-                    },
-                });
+                nextWaiting.authorized = true;
+                nextWaiting.expire = new Date(Date.now() + AUTHORIZATION_REFRESH_TIME);
+                await nextWaitingRecord.save();
 
-                await Singleton.update({
-                    lastNumber: nextWaitingNumber,
-                }, {
-                    where: {
-                        id: 0,
-                    },
-                });
+                singleton.lastNumber = nextWaitingNumber;
+                await singletonRecord.save();
             }
             else {
-                await Singleton.update({
-                    capacity: singleton.capacity + 1,
-                }, {
-                    where: {
-                        id: 0,
-                    },
-                });
+                singleton.capacity++;
+                await singletonRecord.save();
             }
         }));
     }
