@@ -4,8 +4,8 @@
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
-    "p-retry": "^6.2.1",
     "pg": "^8.16.0",
+    "retry-as-promised": "^7.1.1",
     "sequelize": "^6.37.7",
     "zod": "^3.25.30"
   },

@@ -1,13 +1,13 @@
 import crypto from 'crypto';
 import express from 'express';
 import zod from 'zod';
-import { Transaction } from 'sequelize';
 import cookieParser from 'cookie-parser';
 
 import { sequelize } from './connection';
 import { Waiting, WaitingEntity, createWaiting, castWaiting } from './repository/waiting';
 import { Singleton, SingletonEntity, castSingleton } from './repository/singleton';
 import { LISTEN_PORT, AUTHORIZATION_REFRESH_TIME, UPSTREAM_URL, STUB_LISTEN_PORT } from './config';
+import { retryImmediate } from './utility';
 
 export let app = express();
 app.listen(LISTEN_PORT, function (error) {
@@ -22,7 +22,7 @@ app.put('/waiting', async function register(request, response) {
     let sessionId: string = crypto.randomUUID();
     let waiting!: WaitingEntity;
     
-    await sequelize.transaction(async function registerAndAuthorize() {
+    await retryImmediate(() => sequelize.transaction(async function registerAndAuthorize() {
         let singletonRecord: Singleton | null = await Singleton.findByPk(0);
         let singleton: SingletonEntity = castSingleton(singletonRecord!);
 
@@ -56,7 +56,7 @@ app.put('/waiting', async function register(request, response) {
                 id: 0,
             },
         });
-    });
+    }));
 
     response.cookie('session', waiting.sessionId);
     response.end();

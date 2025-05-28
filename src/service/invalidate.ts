@@ -5,6 +5,7 @@ import { sequelize } from '../connection';
 import { Singleton, SingletonEntity, castSingleton } from '../repository/singleton';
 import { Waiting, WaitingEntity, castWaiting } from '../repository/waiting';
 import { INVALIDATION_INTERVAL , AUTHORIZATION_REFRESH_TIME} from "../config";
+import { retryImmediate } from '../utility';
 
 async function run() {
     let currentTime: Date = new Date();
@@ -20,7 +21,7 @@ async function run() {
     let waitingList: WaitingEntity[] = waitingRecordList.map(x => castWaiting(x));
     
     for(let waiting of waitingList) {
-        await sequelize.transaction(async function invalidateWaiting() {
+        await retryImmediate(() => sequelize.transaction(async function invalidateWaiting() {
             let singletonRecord: Singleton | null = await Singleton.findByPk(0);
             let singleton: SingletonEntity = castSingleton(singletonRecord!);
             
@@ -63,7 +64,7 @@ async function run() {
                     },
                 });
             }
-        });
+        }));
     }
 }
 
