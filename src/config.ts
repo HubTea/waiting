@@ -10,3 +10,6 @@ export const UPSTREAM_URL: string = process.env.UPSTREAM_URL!;
 export const CAPACITY: number = parseInt(process.env.CAPACITY!);
 //단위: ms
 export const AUTHORIZATION_REFRESH_TIME: number = parseInt(process.env.AUTHORIZATION_REFRESH_TIME!);
+
+//단위: ms
+export const INVALIDATION_INTERVAL: number = parseInt(process.env.INVALIDATION_INTERVAL!);
