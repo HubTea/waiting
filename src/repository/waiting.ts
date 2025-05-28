@@ -3,8 +3,8 @@ import {Model, DataTypes, CreateOptions} from 'sequelize';
 import {sequelize} from '../connection';
 
 export interface WaitingEntity {
-    number: number;
-    sessionId: string;
+    readonly number: number;
+    readonly sessionId: string;
     authorized: boolean;
     expire: Date | null;
 }

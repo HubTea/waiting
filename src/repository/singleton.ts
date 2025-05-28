@@ -3,7 +3,7 @@ import {Model, DataTypes} from 'sequelize';
 import {sequelize} from '../connection';
 
 export interface SingletonEntity {
-    id: number;
+    readonly id: number;
     capacity: number;
     lastNumber: number;
     currentNumber: number;
