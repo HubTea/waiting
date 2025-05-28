@@ -22,8 +22,8 @@ app.put('/waiting', async function register(request, response) {
     let sessionId: string = crypto.randomUUID();
     let waiting!: WaitingEntity;
     
-    await sequelize.transaction(async function registerAndAuthorize(transaction) {
-        let singletonRecord: Singleton | null = await Singleton.findByPk(0, {transaction});
+    await sequelize.transaction(async function registerAndAuthorize() {
+        let singletonRecord: Singleton | null = await Singleton.findByPk(0);
         let singleton: SingletonEntity = castSingleton(singletonRecord!);
 
         let authorized: boolean = false;
@@ -39,7 +39,6 @@ app.put('/waiting', async function register(request, response) {
                 where: {
                     id: 0
                 },
-                transaction,
             });
         }
 
@@ -48,8 +47,6 @@ app.put('/waiting', async function register(request, response) {
             sessionId,
             authorized,
             expire,
-        }, {
-            transaction
         }));
 
         await Singleton.update({
@@ -58,7 +55,6 @@ app.put('/waiting', async function register(request, response) {
             where: {
                 id: 0,
             },
-            transaction,
         });
     });
 

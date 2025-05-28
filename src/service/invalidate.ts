@@ -20,8 +20,8 @@ async function run() {
     let waitingList: WaitingEntity[] = waitingRecordList.map(x => castWaiting(x));
     
     for(let waiting of waitingList) {
-        await sequelize.transaction(async function invalidateWaiting(transaction) {
-            let singletonRecord: Singleton | null = await Singleton.findByPk(0, {transaction});
+        await sequelize.transaction(async function invalidateWaiting() {
+            let singletonRecord: Singleton | null = await Singleton.findByPk(0);
             let singleton: SingletonEntity = castSingleton(singletonRecord!);
             
             await Waiting.update({
@@ -30,11 +30,10 @@ async function run() {
                 where: {
                     number: waiting.number,
                 },
-                transaction,
             });
 
             let nextWaitingNumber = singleton.lastNumber + 1;
-            let nextWaitingRecord: Waiting | null = await Waiting.findByPk(nextWaitingNumber, {transaction});
+            let nextWaitingRecord: Waiting | null = await Waiting.findByPk(nextWaitingNumber);
             if(nextWaitingRecord) {
                 let nextWaiting: WaitingEntity = castWaiting(nextWaitingRecord);
 
@@ -45,7 +44,6 @@ async function run() {
                     where: {
                         number: nextWaiting.number,
                     },
-                    transaction,
                 });
 
                 await Singleton.update({
@@ -54,7 +52,6 @@ async function run() {
                     where: {
                         id: 0,
                     },
-                    transaction,
                 });
             }
             else {
@@ -64,7 +61,6 @@ async function run() {
                     where: {
                         id: 0,
                     },
-                    transaction,
                 });
             }
         });
