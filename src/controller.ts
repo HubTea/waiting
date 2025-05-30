@@ -59,6 +59,9 @@ app.get('/waiting', async function getWaiting(request, response) {
         sessionId = zod.string().parse(request.cookies['session']);
     }
     catch(error) {
+        if(!(error instanceof zod.ZodError)) {
+            throw error;
+        }
         response.status(400);
         response.json({
             error: 'PARAMETER_ERROR',
@@ -97,6 +100,9 @@ app.all('/{*anyPath}', async function relay(request, response) {
         sessionId = zod.string().parse(request.cookies['session']);
     }
     catch(error) {
+        if(!(error instanceof zod.ZodError)) {
+            throw error;
+        }
         response.status(400);
         response.json({
             error: 'PARAMETER_ERROR',
@@ -144,9 +150,14 @@ app.all('/{*anyPath}', async function relay(request, response) {
         body = Buffer.concat(chunkList);
     }
 
-    const upstreamResponse = await fetch(UPSTREAM_URL + request.path, {
+    const header: Record<string, string> = {};
+    for(let i = 0; i < request.rawHeaders.length; i += 2) {
+        header[request.rawHeaders[i]] = request.rawHeaders[i + 1];
+    }
+    
+    const upstreamResponse = await fetch(UPSTREAM_URL.origin + request.path, {
         method: request.method,
-        headers: request.headers as any,
+        headers: new Headers(header),
         body,
     });
 
