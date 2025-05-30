@@ -9,7 +9,7 @@ import { Singleton, SingletonEntity, castSingleton } from './repository/singleto
 import { LISTEN_PORT, AUTHORIZATION_REFRESH_TIME, UPSTREAM_URL, STUB_LISTEN_PORT } from './config';
 import { retryImmediate } from './utility';
 
-export let app = express();
+export const app = express();
 app.listen(LISTEN_PORT, function (error) {
     if(error) {
         throw error;
@@ -20,12 +20,12 @@ app.use(cookieParser());
 app.use(express.static('./static'));
 
 app.put('/waiting', async function register(request, response) {
-    let sessionId: string = crypto.randomUUID();
+    const sessionId: string = crypto.randomUUID();
     let waiting!: WaitingEntity;
     
     await retryImmediate(() => sequelize.transaction(async function registerAndAuthorize() {
-        let singletonRecord: Singleton = await Singleton.findByPk(0) as Singleton;
-        let singleton: SingletonEntity = castSingleton(singletonRecord);
+        const singletonRecord: Singleton = await Singleton.findByPk(0) as Singleton;
+        const singleton: SingletonEntity = castSingleton(singletonRecord);
 
         let authorized: boolean = false;
         let expire: Date | null = null;
@@ -66,7 +66,7 @@ app.get('/waiting', async function getWaiting(request, response) {
         return;
     }
     
-    let waitingRecord = await Waiting.findOne({
+    const waitingRecord = await Waiting.findOne({
         where: {
             sessionId,
         },
@@ -80,9 +80,9 @@ app.get('/waiting', async function getWaiting(request, response) {
         return;
     }
 
-    let waiting: WaitingEntity = castWaiting(waitingRecord);
-    let singletonRecord: Singleton = await Singleton.findByPk(0) as Singleton;
-    let singleton: SingletonEntity = castSingleton(singletonRecord);
+    const waiting: WaitingEntity = castWaiting(waitingRecord);
+    const singletonRecord: Singleton = await Singleton.findByPk(0) as Singleton;
+    const singleton: SingletonEntity = castSingleton(singletonRecord);
 
     response.json({
         number: waiting.number,
@@ -104,7 +104,7 @@ app.all('/{*anyPath}', async function relay(request, response) {
         return;
     }
 
-    let waitingRecord = await Waiting.findOne({
+    const waitingRecord = await Waiting.findOne({
         where: {
             sessionId,
         },
@@ -118,7 +118,7 @@ app.all('/{*anyPath}', async function relay(request, response) {
         return;
     }
 
-    let waiting: WaitingEntity = castWaiting(waitingRecord);
+    const waiting: WaitingEntity = castWaiting(waitingRecord);
     if(!waiting.authorized) {
         response.status(400);
         response.json({
@@ -136,30 +136,30 @@ app.all('/{*anyPath}', async function relay(request, response) {
     });
 
     let body: Buffer | undefined;
-    let chunkList: Buffer[] = [];
+    const chunkList: Buffer[] = [];
     if(request.method != 'GET' && request.method != 'HEAD') {
-        for await(let chunk of request) {
+        for await(const chunk of request) {
             chunkList.push(chunk);
         }
         body = Buffer.concat(chunkList);
     }
 
-    let upstreamResponse = await fetch(UPSTREAM_URL + request.path, {
+    const upstreamResponse = await fetch(UPSTREAM_URL + request.path, {
         method: request.method,
         headers: request.headers as any,
         body,
     });
 
     let responseBody: Buffer | undefined;
-    let upstreamChunkList: Buffer[] = [];
+    const upstreamChunkList: Buffer[] = [];
     if(upstreamResponse.body) {
-        for await(let chunk of upstreamResponse.body) {
+        for await(const chunk of upstreamResponse.body) {
             upstreamChunkList.push(Buffer.from(chunk));
         }
         responseBody = Buffer.concat(upstreamChunkList);
     }
 
-    let responseHeader: Headers = new Headers(upstreamResponse.headers);
+    const responseHeader: Headers = new Headers(upstreamResponse.headers);
     responseHeader.delete('Content-Encoding');
     
     response.status(upstreamResponse.status);
@@ -167,7 +167,7 @@ app.all('/{*anyPath}', async function relay(request, response) {
     response.end(responseBody);
 });
 
-let stub = express();
+const stub = express();
 stub.listen(STUB_LISTEN_PORT, error =>{
     if(error) {
         throw error;

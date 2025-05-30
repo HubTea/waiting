@@ -8,8 +8,8 @@ import { INVALIDATION_INTERVAL , AUTHORIZATION_REFRESH_TIME} from "../config";
 import { retryImmediate } from '../utility';
 
 async function run() {
-    let currentTime: Date = new Date();
-    let waitingRecordList: Waiting[] = await Waiting.findAll({
+    const currentTime: Date = new Date();
+    const waitingRecordList: Waiting[] = await Waiting.findAll({
         where: {
             expire: {
                 [Op.not]: null,
@@ -19,20 +19,20 @@ async function run() {
         }
     });
     
-    for(let waitingRecord of waitingRecordList) {
+    for(const waitingRecord of waitingRecordList) {
         await retryImmediate(() => sequelize.transaction(async function invalidateWaiting() {
-            let waiting: WaitingEntity = castWaiting(waitingRecord);
-            let singletonRecord: Singleton = await Singleton.findByPk(0) as Singleton;
-            let singleton: SingletonEntity = castSingleton(singletonRecord);
+            const waiting: WaitingEntity = castWaiting(waitingRecord);
+            const singletonRecord: Singleton = await Singleton.findByPk(0) as Singleton;
+            const singleton: SingletonEntity = castSingleton(singletonRecord);
             
             waiting.authorized = false;
             await waitingRecord.save();
 
-            let nextWaitingNumber = singleton.lastNumber + 1;
-            let nextWaitingRecord: Waiting | null = await Waiting.findByPk(nextWaitingNumber);
+            const nextWaitingNumber = singleton.lastNumber + 1;
+            const nextWaitingRecord: Waiting | null = await Waiting.findByPk(nextWaitingNumber);
 
             if(nextWaitingRecord) {
-                let nextWaiting: WaitingEntity = castWaiting(nextWaitingRecord);
+                const nextWaiting: WaitingEntity = castWaiting(nextWaitingRecord);
 
                 nextWaiting.authorized = true;
                 nextWaiting.expire = new Date(Date.now() + AUTHORIZATION_REFRESH_TIME);
