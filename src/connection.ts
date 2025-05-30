@@ -5,7 +5,7 @@ import { DATABASE_URL, DATABASE_POOL_MAX } from "./config";
 
 let namespace = cls.createNamespace('sequelize');
 Sequelize.useCLS(namespace);
-export let sequelize = new Sequelize(DATABASE_URL, {
+export let sequelize = new Sequelize(DATABASE_URL.href, {
     pool: {
         max: DATABASE_POOL_MAX,
     },
