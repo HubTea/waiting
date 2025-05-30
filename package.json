@@ -24,7 +24,9 @@
     "typescript-eslint": "^8.33.0"
   },
   "scripts": {
-    "start": "node ./dist/main.js",
-    "watch": "tsc --watch"
+    "start": "node ./dist/controller.js",
+    "tsc-watch": "tsc --watch",
+    "lint-watch": "nodemon -w ./src -e ts --exec \"eslint ./src/**/*.ts\"",
+    "dev-watch": "nodemon -w ./dist ./dist/controller.js"
   }
 }
