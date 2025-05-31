@@ -6,16 +6,18 @@
                 alert('error');
                 return;
             }
+            let sessionDto = await response.json();
+            localStorage.setItem('sessionId', sessionDto.sessionId);
             await getWaiting();
         }
 
         async function getWaiting() {
-            let response = await fetch('/waiting');
+            let response = await fetch('/waiting', {method: 'get', headers: {'X-WAITING-SESSION': localStorage.getItem('sessionId')}});
             document.getElementById('waiting').innerText = await response.text();
         }
 
         async function getUpstream() {
-            let response = await fetch('/sdf');
+            let response = await fetch('/sdf', {method: 'get', headers: {'X-WAITING-SESSION': localStorage.getItem('sessionId')}});
             document.getElementById('upstream').innerText = await response.text();
         }
 
