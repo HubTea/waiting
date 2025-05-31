@@ -1,13 +1,14 @@
 import crypto from 'crypto';
 import express, { Request, Response } from 'express';
 import * as yup from 'yup';
-import { Controller, Put, Get, All, HttpException, HttpStatus, Req, Res, Headers as NestHeaders } from '@nestjs/common';
+import { Controller, Put, Get, All, HttpException, HttpStatus, Req, Res, Headers as NestHeaders, Delete } from '@nestjs/common';
 
 import { sequelize } from './connection';
 import { Waiting, WaitingEntity, createWaiting, castWaiting } from './repository/waiting';
 import { Singleton, SingletonEntity, castSingleton } from './repository/singleton';
 import { AUTHORIZATION_REFRESH_TIME, UPSTREAM_URL, STUB_LISTEN_PORT } from './config';
 import { retryImmediate } from './utility';
+import * as waitingService from './service/waiting';
 
 
 const sessionSchema = yup.object({
@@ -118,6 +119,24 @@ export class WaitingController {
             lastNumber: singleton.lastNumber,
             authorized: waiting.authorized,
         };
+    }
+
+    @Delete('/waiting')
+    async invalidateWaiting(@NestHeaders('X-WAITING-SESSION') sessionId: string): Promise<void> {
+        sessionId = parse(() => yup.string().uuid().required().validateSync(sessionId));
+
+        const waitingRecord = await Waiting.findOne({
+            where: {
+                sessionId,
+            },
+        });
+
+        if(!waitingRecord) {
+            throw new HttpException(ErrorCode.SESSION_NOT_FOUND, HttpStatus.BAD_REQUEST);
+        }
+
+        const waiting: WaitingEntity = castWaiting(waitingRecord);
+        await waitingService.invalidate(waiting.number);
     }
 
     @All('/{*anyPath}')

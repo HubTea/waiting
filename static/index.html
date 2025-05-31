@@ -21,12 +21,18 @@
             document.getElementById('upstream').innerText = await response.text();
         }
 
+        async function deleteSession() {
+            await fetch('/waiting', {method: 'delete', headers: {'X-WAITING-SESSION': localStorage.getItem('sessionId')}});
+            await getWaiting();
+        }
+
         setInterval(getWaiting, 5000);
     </script>
     <body>
         <div>
             <button onclick="newSession()" style="background-color: skyblue;">PUT /waiting</button>
             <button onclick="getUpstream()" style="background-color: pink;">get upstream</button>
+            <button onclick="deleteSession()" style="background-color: deepskyblue;">DELETE /waiting</button>
         </div>
         <div id="waiting"></div>
         <div id="upstream"></div>
