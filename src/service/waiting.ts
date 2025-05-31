@@ -1,13 +1,12 @@
-import timer from 'timers/promises';
 import { Op } from 'sequelize';
 
 import { sequelize } from '../connection';
 import { Singleton, SingletonEntity, castSingleton } from '../repository/singleton';
 import { Waiting, WaitingEntity, castWaiting } from '../repository/waiting';
-import { INVALIDATION_INTERVAL , AUTHORIZATION_REFRESH_TIME} from "../config";
+import { AUTHORIZATION_REFRESH_TIME } from "../config";
 import { retryImmediate } from '../utility';
 
-async function run() {
+export async function invalidate() {
     const currentTime: Date = new Date();
     const waitingRecordList: Waiting[] = await Waiting.findAll({
         where: {
@@ -48,12 +47,3 @@ async function run() {
         }));
     }
 }
-
-async function main() {
-    while(true) {
-        await run();
-        await timer.setTimeout(INVALIDATION_INTERVAL);
-    }
-}
-
-void main();
