@@ -15,7 +15,7 @@
     "strictNullChecks": true,
     
     
-    "esModuleInterop": true,
+    //"esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": true,
     "strictBindCallApply": true,

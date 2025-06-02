@@ -1,5 +1,5 @@
 import { Sequelize, Transaction } from "sequelize";
-import cls from 'cls-hooked';
+import * as cls from 'cls-hooked';
 
 import { DATABASE_URL, DATABASE_POOL_MAX } from "./config";
 
