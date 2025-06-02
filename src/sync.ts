@@ -9,4 +9,5 @@ export async function sync() {
     await sequelize.sync({
         force: true,
     });
+    await sequelize.close();
 }
