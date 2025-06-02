@@ -19,13 +19,13 @@ node ./generateDotEnvTemplate.js
 아래 스크립트를 실행하여 데이터베이스를 초기화합니다.
 DBMS 내에 사용할 데이터베이스가 먼저 만들어져 있어야 합니다.
 ```sh
-node ./dist/sync.js
-node ./dist/service/init.js
+node -e "import x from './dist/sync.js'; await x.sync()"
+node -e "import x from './dist/service/init.js'; await x.init()"
 ```
 
 
 ## 실행
-아래 두 개의 명령어를 실행합니다.
+아래 두 개의 명령어를 각각 별도의 쉘에서 실행합니다.
 ```sh
 npm run start:prod
 ```
